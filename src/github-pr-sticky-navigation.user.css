@@ -1,0 +1,87 @@
+/* ==UserStyle==
+@name         GitHub PR Sticky Navigation (CSS Only)
+@namespace    https://github.com/SimplyRin
+@version      1.0
+@description  GitHub の Pull Request ページで、スクロール時にナビゲーションバーを固定表示する（CSS のみ）
+@author       SimplyRin
+@homepageURL  https://github.com/SimplyRin/github-tampermonkey
+@updateURL    https://raw.githubusercontent.com/SimplyRin/github-tampermonkey/main/src/github-pr-sticky-navigation.user.css
+@license      MIT
+==/UserStyle== */
+
+@-moz-document regexp("https://github\\.com/.*/pull/.*") {
+    /* 
+     * PR タブナビゲーション（Conversation, Commits, Checks, Files changed）を
+     * スクロール時に画面上部に固定表示する
+     */
+
+    /* 親要素の overflow 制約を解除（position: sticky を有効にするため） */
+    .clearfix.container-xl,
+    .clearfix.px-3,
+    .pull-request-tab-content,
+    #discussion_bucket,
+    .repository-content,
+    #repo-content-pjax-container,
+    #repo-content-turbo-frame,
+    .container-xl.clearfix {
+        overflow: visible !important;
+    }
+
+    /* 従来の .tabnav スタイル（conversation/checks/files ページ） */
+    .tabnav:has(> nav.tabnav-tabs[aria-label="Pull request tabs"]) {
+        position: sticky !important;
+        /* GitHub のスティッキーヘッダー（PR タイトル）の下に配置 */
+        top: var(--observed-header-height, 60px) !important;
+        z-index: 90 !important;
+        background-color: var(--bgColor-default, var(--color-canvas-default)) !important;
+        border-bottom: 1px solid var(--borderColor-default, var(--color-border-default)) !important;
+        box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12) !important;
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* スティッキーヘッダーがない場合（最上部にスクロール時） */
+    .tabnav:has(> nav.tabnav-tabs[aria-label="Pull request tabs"]):not(.below-sticky-header) {
+        top: 0 !important;
+    }
+
+    /* React ベースのナビゲーション（commits ページ） */
+    nav[aria-label="Pull request navigation tabs"] {
+        position: sticky !important;
+        top: var(--observed-header-height, 60px) !important;
+        z-index: 90 !important;
+        background-color: var(--bgColor-default, var(--color-canvas-default)) !important;
+        border-bottom: 1px solid var(--borderColor-default, var(--color-border-default)) !important;
+        box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12) !important;
+        padding: 8px 16px !important;
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* commits ページの親要素の overflow 制約を解除 */
+    .flex-auto:has(> nav[aria-label="Pull request navigation tabs"]) {
+        overflow: visible !important;
+    }
+
+    /* スティッキーヘッダーの高さに合わせて調整 */
+    #partial-discussion-header.sticky-header-wrapper ~ * .tabnav:has(> nav.tabnav-tabs[aria-label="Pull request tabs"]),
+    #partial-discussion-header.sticky-header-wrapper ~ * nav[aria-label="Pull request navigation tabs"] {
+        top: var(--observed-header-height, 60px) !important;
+    }
+
+    /* スティッキーヘッダーがスタックしている時 */
+    html:has(#sticky-header-backdrop.is-stuck) .tabnav:has(> nav.tabnav-tabs[aria-label="Pull request tabs"]),
+    html:has(#sticky-header-backdrop.is-stuck) nav[aria-label="Pull request navigation tabs"] {
+        top: var(--observed-header-height, 60px) !important;
+    }
+
+    /* スティッキーヘッダーがスタックしていない時（ページ上部） */
+    html:not(:has(#sticky-header-backdrop.is-stuck)) .tabnav:has(> nav.tabnav-tabs[aria-label="Pull request tabs"]),
+    html:not(:has(#sticky-header-backdrop.is-stuck)) nav[aria-label="Pull request navigation tabs"] {
+        top: 0 !important;
+    }
+}
