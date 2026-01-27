@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         GitHub PR Sticky Navigation
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  GitHub の Pull Request ページで、スクロール時に Conversation、Commits、Checks、Files changed のナビゲーションバーを固定表示する
 // @author       SimplyRin
-// @match        https://github.com/*/pull/*
+// @match        https://github.com/*
 // @icon         https://github.githubassets.com/favicons/favicon.svg
 // @grant        GM_addStyle
 // @updateURL    https://raw.githubusercontent.com/SimplyRin/github-tampermonkey/main/src/github-pr-sticky-navigation.user.js
@@ -77,14 +77,24 @@
             top: var(--sticky-header-height, 60px);
         }
 
-        /* files-changed ページのレビューツールバー (.pr-toolbar) をナビゲーションバーの下に配置 */
-        .pr-toolbar.js-toggle-stuck {
-            top: var(--pr-nav-height, 48px) !important;
+        /* files-changed ページのレビューツールバー (.pr-toolbar) */
+        .pr-toolbar.is-stuck {
+            margin-top: 8px !important;
         }
 
-        /* ナビゲーションバーとスティッキーヘッダーの両方がある場合 */
-        html:has(#sticky-header-backdrop.is-stuck) .pr-toolbar.js-toggle-stuck {
-            top: calc(var(--observed-header-height, 60px) + var(--pr-nav-height, 48px)) !important;
+        /* ナビゲーションバーがある場合はツールバーをその下に配置 */
+        #sticky-pr-nav.is-visible ~ .pr-toolbar.is-stuck {
+            margin-top: 8px !important;
+        }
+
+        /* files ページのファイルツリー (Filter changed files) の上にスペースを追加 */
+        #sticky-pr-nav-spacer {
+            display: none;
+            height: 0;
+        }
+
+        #sticky-pr-nav-spacer.is-visible {
+            display: block;
         }
     `);
 
@@ -146,6 +156,13 @@
     }
 
     function init() {
+        // Pull Request ページかどうかを判断
+        const path = window.location.pathname;
+        if (!path.includes('/pull/')) {
+            // Pull Request ページではない場合は処理を終了
+            return;
+        }
+
         // 既存のクローンがあれば削除
         const existingNav = document.getElementById('sticky-pr-nav');
         if (existingNav) {
@@ -169,12 +186,37 @@
         stickyNav.innerHTML = originalNav.outerHTML;
         document.body.appendChild(stickyNav);
 
+        // files ページの場合、ファイルツリーの上にスペーサーを追加
+        if (currentPageType === 'files') {
+            setupFileTreeSpacer();
+        }
+
         // スクロールイベントとIntersectionObserverの設定
         setupScrollDetection();
         setupHeaderObserver();
 
         // 初期状態をチェック
         checkVisibility();
+    }
+
+    function setupFileTreeSpacer() {
+        // 既存のスペーサーを削除
+        const existingSpacer = document.getElementById('sticky-pr-nav-spacer');
+        if (existingSpacer) {
+            existingSpacer.remove();
+        }
+
+        // ファイルツリーのコンテナを探す (.subnav-search の親要素)
+        const fileTreeFilter = document.querySelector('#file-tree-filter-field');
+        if (fileTreeFilter) {
+            const container = fileTreeFilter.closest('.subnav-search')?.parentElement;
+            if (container) {
+                // スペーサーを作成してファイルツリーの前に挿入
+                const spacer = document.createElement('div');
+                spacer.id = 'sticky-pr-nav-spacer';
+                container.insertBefore(spacer, container.firstChild);
+            }
+        }
     }
 
     function setupScrollDetection() {
@@ -226,6 +268,16 @@
             window.addEventListener('scroll', scrollHandler, { passive: true });
         }
 
+        // files ページではスクロール時に is-stuck 要素の位置を確認
+        if (currentPageType === 'files') {
+            const filesScrollHandler = () => {
+                if (stickyNav?.classList.contains('is-visible')) {
+                    updateStickyNavPosition();
+                }
+            };
+            window.addEventListener('scroll', filesScrollHandler, { passive: true });
+        }
+
         // ウィンドウリサイズ時に位置を更新
         window.addEventListener('resize', () => {
             if (stickyNav?.classList.contains('is-visible')) {
@@ -237,13 +289,59 @@
     function showStickyNav() {
         if (stickyNav) {
             stickyNav.classList.add('is-visible');
+            // files ページの場合、pr-toolbar に is-stuck を追加
+            if (currentPageType === 'files') {
+                const toolbar = document.querySelector('.pr-toolbar');
+                if (toolbar) {
+                    toolbar.classList.add('is-stuck');
+                    // ツールバーのサイズが変更されるため、次のフレームで位置を更新
+                    requestAnimationFrame(() => {
+                        updateStickyNavPosition();
+                        // ファイルツリーのスペーサーを表示
+                        updateFileTreeSpacer();
+                    });
+                    return;
+                }
+            }
             updateStickyNavPosition();
+        }
+    }
+
+    function updateFileTreeSpacer() {
+        const spacer = document.getElementById('sticky-pr-nav-spacer');
+        if (!spacer) return;
+
+        const toolbar = document.querySelector('.pr-toolbar');
+        const toolbarRect = toolbar?.getBoundingClientRect();
+        const stickyNavRect = stickyNav?.getBoundingClientRect();
+
+        if (toolbarRect && stickyNavRect && stickyNav?.classList.contains('is-visible')) {
+            // ツールバー + ナビゲーションバーの合計高さをスペーサーの高さに設定
+            const totalHeight = stickyNavRect.bottom;
+            spacer.style.height = `${totalHeight}px`;
+            spacer.classList.add('is-visible');
+        } else {
+            spacer.style.height = '0';
+            spacer.classList.remove('is-visible');
         }
     }
 
     function hideStickyNav() {
         if (stickyNav) {
             stickyNav.classList.remove('is-visible');
+            // files ページの場合、pr-toolbar から is-stuck を削除
+            if (currentPageType === 'files') {
+                const toolbar = document.querySelector('.pr-toolbar');
+                if (toolbar) {
+                    toolbar.classList.remove('is-stuck');
+                }
+                // ファイルツリーのスペーサーを非表示
+                const spacer = document.getElementById('sticky-pr-nav-spacer');
+                if (spacer) {
+                    spacer.style.height = '0';
+                    spacer.classList.remove('is-visible');
+                }
+            }
         }
     }
 
@@ -254,6 +352,25 @@
         const originalRect = originalNav.getBoundingClientRect();
         stickyNav.style.paddingLeft = `${originalRect.left}px`;
         stickyNav.style.paddingRight = `${window.innerWidth - originalRect.right}px`;
+
+        // files ページの場合、ツールバーの下に配置（ツールバーは元の位置に表示）
+        if (currentPageType === 'files') {
+            const toolbar = document.querySelector('.pr-toolbar');
+            if (toolbar && toolbar.classList.contains('is-stuck')) {
+                const toolbarRect = toolbar.getBoundingClientRect();
+                stickyNav.style.top = `${toolbarRect.bottom}px`;
+                
+                // file-header の位置も更新（ナビゲーションバーの下に配置）
+                requestAnimationFrame(() => {
+                    const stickyNavRect = stickyNav.getBoundingClientRect();
+                    const fileHeaders = document.querySelectorAll('.sticky-file-header');
+                    fileHeaders.forEach(header => {
+                        header.style.top = `${stickyNavRect.bottom}px`;
+                    });
+                });
+                return;
+            }
+        }
 
         // ヘッダーが固定されているかどうかをチェック
         const isHeaderStuck = stickyHeaderBackdrop?.classList.contains('is-stuck');
