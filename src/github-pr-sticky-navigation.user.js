@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name         GitHub PR Sticky Navigation
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  GitHubのPull Requestページで、スクロール時にConversation、Commits、Checks、Files changedのナビゲーションバーを固定表示する
-// @author       You
+// @version      1.1
+// @description  GitHub の Pull Request ページで、スクロール時に Conversation、Commits、Checks、Files changed のナビゲーションバーを固定表示する
+// @author       SimplyRin
 // @match        https://github.com/*/pull/*
 // @icon         https://github.githubassets.com/favicons/favicon.svg
 // @grant        GM_addStyle
+// @updateURL    https://raw.githubusercontent.com/SimplyRin/github-tampermonkey/main/src/github-pr-sticky-navigation.user.js
+// @downloadURL  https://raw.githubusercontent.com/SimplyRin/github-tampermonkey/main/src/github-pr-sticky-navigation.user.js
 // ==/UserScript==
 
 (function() {
@@ -252,7 +254,7 @@
 
         if (isHeaderStuck || hasNewStickyHeader) {
             // ヘッダーの高さを取得して、その下に配置
-
+            
             // 1. 新しいスティッキーヘッダー (commits ページ) を試す
             if (newStickyHeader && hasNewStickyHeader) {
                 const headerRect = newStickyHeader.getBoundingClientRect();
