@@ -76,6 +76,16 @@
         #sticky-pr-nav.below-header {
             top: var(--sticky-header-height, 60px);
         }
+
+        /* files-changed ページのレビューツールバー (.pr-toolbar) をナビゲーションバーの下に配置 */
+        .pr-toolbar.js-toggle-stuck {
+            top: var(--pr-nav-height, 48px) !important;
+        }
+
+        /* ナビゲーションバーとスティッキーヘッダーの両方がある場合 */
+        html:has(#sticky-header-backdrop.is-stuck) .pr-toolbar.js-toggle-stuck {
+            top: calc(var(--observed-header-height, 60px) + var(--pr-nav-height, 48px)) !important;
+        }
     `);
 
     let stickyNav = null;
