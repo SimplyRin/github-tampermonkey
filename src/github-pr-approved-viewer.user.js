@@ -378,12 +378,19 @@ const CODEOWNERS = "https://github.com/SimplyRin/test-codeowners/blob/main/.gith
         const u = user.replace('@', '');
 
         return `
+<a
+href="https://github.com/${u}"
+data-hovercard-type="user"
+data-hovercard-url="/users/${u}/hovercard"
+style="display:inline-block;line-height:0;"
+tabindex="-1">
 <img
 src="https://github.com/${u}.png"
-title="${user}"
+alt="${user}"
 width="20"
 height="20"
 class="avatar circle">
+</a>
 `;
 
     }
