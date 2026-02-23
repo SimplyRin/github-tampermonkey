@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub PR Sticky Navigation
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  GitHub の Pull Request ページで、スクロール時に Conversation、Commits、Checks、Files changed のナビゲーションバーを固定表示する
 // @author       SimplyRin
 // @match        https://github.com/*
@@ -18,7 +18,7 @@
     GM_addStyle(`
         /* クローンされたナビゲーションバーのスタイル */
         #sticky-pr-nav {
-            display: none;
+          display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -111,11 +111,20 @@
             return 'commits';
         } else if (path.includes('/checks')) {
             return 'checks';
-        } else if (path.includes('/files')) {
+        } else if (path.includes('/files') || path.includes('/changes')) {
             return 'files';
         } else {
             return 'conversation';
         }
+    }
+
+    function getFilesToolbar() {
+        return document.querySelector('[class*="PullRequestFilesToolbar-module__toolbar"]');
+    }
+
+    function isFilesToolbarStuck(toolbar) {
+        if (!toolbar) return false;
+        return [...toolbar.classList].some(c => c.includes('PullRequestFilesToolbar-module__is-stuck'));
     }
 
     function findNavigationElement() {
@@ -256,27 +265,41 @@
             });
         }
 
-        // commits ページの新しいスティッキーヘッダーも監視
-        const newStickyHeader = document.querySelector('.use-sticky-header-module__stickyHeader--UQFpz');
+        // 新しいスティッキーPRヘッダーのクラス変化を監視（is-stuckの付加/削除を検知）
+        const newStickyHeader = document.querySelector('[class*="StickyPullRequestHeader-module__prHeader"]');
         if (newStickyHeader) {
-            // スクロールイベントで位置を更新
-            const scrollHandler = () => {
-                if (stickyNav?.classList.contains('is-visible')) {
-                    updateStickyNavPosition();
-                }
-            };
-            window.addEventListener('scroll', scrollHandler, { passive: true });
+            const stickyHeaderObserver = new MutationObserver(() => {
+                updateStickyNavPosition();
+            });
+            stickyHeaderObserver.observe(newStickyHeader, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
         }
 
-        // files ページではスクロール時に is-stuck 要素の位置を確認
+        // files ページのツールバーのクラス変化を監視（is-stuck の付加/削除を検知）
         if (currentPageType === 'files') {
-            const filesScrollHandler = () => {
-                if (stickyNav?.classList.contains('is-visible')) {
+            const filesToolbar = getFilesToolbar();
+            if (filesToolbar) {
+                const filesToolbarObserver = new MutationObserver(() => {
                     updateStickyNavPosition();
-                }
-            };
-            window.addEventListener('scroll', filesScrollHandler, { passive: true });
+                    if (stickyNav?.classList.contains('is-visible')) {
+                        updateFileTreeSpacer();
+                    }
+                });
+                filesToolbarObserver.observe(filesToolbar, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
         }
+
+        // すべてのページでスクロール時に位置を更新
+        window.addEventListener('scroll', () => {
+            if (stickyNav?.classList.contains('is-visible')) {
+                updateStickyNavPosition();
+            }
+        }, { passive: true });
 
         // ウィンドウリサイズ時に位置を更新
         window.addEventListener('resize', () => {
@@ -289,21 +312,12 @@
     function showStickyNav() {
         if (stickyNav) {
             stickyNav.classList.add('is-visible');
-            // files ページの場合、pr-toolbar に is-stuck を追加
-            if (currentPageType === 'files') {
-                const toolbar = document.querySelector('.pr-toolbar');
-                if (toolbar) {
-                    toolbar.classList.add('is-stuck');
-                    // ツールバーのサイズが変更されるため、次のフレームで位置を更新
-                    requestAnimationFrame(() => {
-                        updateStickyNavPosition();
-                        // ファイルツリーのスペーサーを表示
-                        updateFileTreeSpacer();
-                    });
-                    return;
+            requestAnimationFrame(() => {
+                updateStickyNavPosition();
+                if (currentPageType === 'files') {
+                    updateFileTreeSpacer();
                 }
-            }
-            updateStickyNavPosition();
+            });
         }
     }
 
@@ -311,14 +325,12 @@
         const spacer = document.getElementById('sticky-pr-nav-spacer');
         if (!spacer) return;
 
-        const toolbar = document.querySelector('.pr-toolbar');
-        const toolbarRect = toolbar?.getBoundingClientRect();
+        const toolbar = getFilesToolbar();
         const stickyNavRect = stickyNav?.getBoundingClientRect();
 
-        if (toolbarRect && stickyNavRect && stickyNav?.classList.contains('is-visible')) {
-            // ツールバー + ナビゲーションバーの合計高さをスペーサーの高さに設定
-            const totalHeight = stickyNavRect.bottom;
-            spacer.style.height = `${totalHeight}px`;
+        if (toolbar && stickyNavRect && stickyNav?.classList.contains('is-visible')) {
+            // ナビゲーションバーの下端をスペーサーの高さに設定
+            spacer.style.height = `${stickyNavRect.bottom}px`;
             spacer.classList.add('is-visible');
         } else {
             spacer.style.height = '0';
@@ -329,12 +341,7 @@
     function hideStickyNav() {
         if (stickyNav) {
             stickyNav.classList.remove('is-visible');
-            // files ページの場合、pr-toolbar から is-stuck を削除
             if (currentPageType === 'files') {
-                const toolbar = document.querySelector('.pr-toolbar');
-                if (toolbar) {
-                    toolbar.classList.remove('is-stuck');
-                }
                 // ファイルツリーのスペーサーを非表示
                 const spacer = document.getElementById('sticky-pr-nav-spacer');
                 if (spacer) {
@@ -353,13 +360,13 @@
         stickyNav.style.paddingLeft = `${originalRect.left}px`;
         stickyNav.style.paddingRight = `${window.innerWidth - originalRect.right}px`;
 
-        // files ページの場合、ツールバーの下に配置（ツールバーは元の位置に表示）
+        // files ページの場合、ツールバーの下に配置
         if (currentPageType === 'files') {
-            const toolbar = document.querySelector('.pr-toolbar');
-            if (toolbar && toolbar.classList.contains('is-stuck')) {
+            const toolbar = getFilesToolbar();
+            if (toolbar && isFilesToolbarStuck(toolbar)) {
                 const toolbarRect = toolbar.getBoundingClientRect();
                 stickyNav.style.top = `${toolbarRect.bottom}px`;
-                
+                stickyNav.classList.add('below-header');
                 // file-header の位置も更新（ナビゲーションバーの下に配置）
                 requestAnimationFrame(() => {
                     const stickyNavRect = stickyNav.getBoundingClientRect();
@@ -372,28 +379,25 @@
             }
         }
 
-        // ヘッダーが固定されているかどうかをチェック
-        const isHeaderStuck = stickyHeaderBackdrop?.classList.contains('is-stuck');
-
-        // commits ページの新しいスティッキーヘッダーをチェック
-        const newStickyHeader = document.querySelector('.use-sticky-header-module__stickyHeader--UQFpz');
-        const hasNewStickyHeader = newStickyHeader && newStickyHeader.getBoundingClientRect().top <= 0;
-
-        if (isHeaderStuck || hasNewStickyHeader) {
-            // ヘッダーの高さを取得して、その下に配置
-            
-            // 1. 新しいスティッキーヘッダー (commits ページ) を試す
-            if (newStickyHeader && hasNewStickyHeader) {
+        // 1. 新しいスティッキーPRヘッダー（クラス名パターンで検索）を確認
+        const newStickyHeader = document.querySelector('[class*="StickyPullRequestHeader-module__prHeader"]');
+        if (newStickyHeader) {
+            const isStuck = [...newStickyHeader.classList].some(c => c.includes('is-stuck'));
+            if (isStuck) {
                 const headerRect = newStickyHeader.getBoundingClientRect();
-                const headerBottom = headerRect.bottom;
-                if (headerBottom > 0) {
-                    stickyNav.style.top = `${headerBottom}px`;
+                if (headerRect.bottom > 0) {
+                    stickyNav.style.top = `${headerRect.bottom}px`;
                     stickyNav.classList.add('below-header');
                     return;
                 }
             }
+        }
 
-            // 2. 従来のヘッダー構造 (conversation/checks/files ページ) を試す
+        // 2. 従来のスティッキーヘッダー構造を確認
+        const isHeaderStuck = stickyHeaderBackdrop?.classList.contains('is-stuck');
+
+        if (isHeaderStuck) {
+            // 従来のヘッダー構造 (conversation/checks/files ページ) を試す
             const headerWrapper = document.getElementById('partial-discussion-header');
             if (headerWrapper) {
                 const stickyHeader = headerWrapper.querySelector('.sticky-header-container');
@@ -424,7 +428,19 @@
         if (!originalNav) return;
 
         const rect = originalNav.getBoundingClientRect();
-        const headerHeight = 60; // 概算のヘッダー高さ
+
+        // スティッキーPRヘッダーが表示中の場合、その高さを考慮
+        let headerHeight = 0;
+        const newStickyHeader = document.querySelector('[class*="StickyPullRequestHeader-module__prHeader"]');
+        if (newStickyHeader) {
+            const isStuck = [...newStickyHeader.classList].some(c => c.includes('is-stuck'));
+            if (isStuck) {
+                headerHeight = newStickyHeader.getBoundingClientRect().bottom;
+            }
+        }
+        if (headerHeight <= 0) {
+            headerHeight = 60; // フォールバック
+        }
 
         if (rect.bottom < headerHeight) {
             showStickyNav();
