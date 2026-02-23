@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub PR Sticky Navigation
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  GitHub の Pull Request ページで、スクロール時に Conversation、Commits、Checks、Files changed のナビゲーションバーを固定表示する
 // @author       SimplyRin
 // @match        https://github.com/*
@@ -165,17 +165,17 @@
     }
 
     function init() {
+        // 既存のクローンがあれば削除（ページ遷移時の残留を防ぐ）
+        const existingNav = document.getElementById('sticky-pr-nav');
+        if (existingNav) {
+            existingNav.remove();
+        }
+
         // Pull Request ページかどうかを判断
         const path = window.location.pathname;
         if (!path.includes('/pull/')) {
             // Pull Request ページではない場合は処理を終了
             return;
-        }
-
-        // 既存のクローンがあれば削除
-        const existingNav = document.getElementById('sticky-pr-nav');
-        if (existingNav) {
-            existingNav.remove();
         }
 
         // オリジナルのナビゲーションを取得
