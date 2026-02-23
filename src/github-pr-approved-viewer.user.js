@@ -11,8 +11,6 @@
 // @downloadURL  https://raw.githubusercontent.com/SimplyRin/github-tampermonkey/main/src/github-pr-approved-viewer.user.js
 // ==/UserScript==
 
-const CODEOWNERS = "https://github.com/SimplyRin/test-codeowners/blob/main/.github/CODEOWNERS";
-
 (function () {
     'use strict';
 
@@ -22,7 +20,15 @@ const CODEOWNERS = "https://github.com/SimplyRin/test-codeowners/blob/main/.gith
         const match = path.match(/^\/[^/]+\/[^/]+\/pull\/\d+\/?$/);
         return match !== null;
     }
-
+    function getCodeOwnersUrl() {
+        const [, owner, repo] = window.location.pathname.split('/');
+        // PRのベースブランチをDOMから取得、見つからなければ 'main' にフォールバック
+        const branch =
+            document.querySelector('.base-ref')?.textContent?.trim() ||
+            document.querySelector('[data-base-ref]')?.dataset?.baseRef ||
+            'main';
+        return `https://github.com/${owner}/${repo}/blob/${branch}/.github/CODEOWNERS`;
+    }
     async function getUrl(url) {
         const res = await fetch(url);
         const html = await res.text();
@@ -41,7 +47,7 @@ const CODEOWNERS = "https://github.com/SimplyRin/test-codeowners/blob/main/.gith
     //
     async function getCodeOwners() {
         try {
-            const div = await getUrl(CODEOWNERS);
+            const div = await getUrl(getCodeOwnersUrl());
 
             let codeowner = document.querySelector("#copilot-button-positioner > div.CodeBlob-module__codeBlobInner__tfjuQ > div > div.react-code-lines").innerText;
 
