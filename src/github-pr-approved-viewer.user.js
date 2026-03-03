@@ -155,12 +155,13 @@
         for (let file of changedFiles) {
             file = cleanFileName(file);
 
+            file = ensureLeadingSlash(file);
+
             let matchedOwners = [];
             let matchedPattern = null;
 
             for (const rule of rules) {
-
-                const regex = patternToRegex(rule.pattern);
+                const regex = patternToRegex(ensureLeadingSlash(rule.pattern));
 
                 if (regex.test(file)) {
                     matchedOwners = rule.owners;
@@ -222,6 +223,13 @@
             }
             return { ...row, owners: expanded };
         });
+    }
+
+    function ensureLeadingSlash(path) {
+        if (!path.startsWith('/')) {
+            return '/' + path;
+        }
+        return path;
     }
 
     function patternToRegex(pattern) {
