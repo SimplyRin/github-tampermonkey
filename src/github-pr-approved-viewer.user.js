@@ -181,16 +181,25 @@
     function insertSkeletonSection() {
         ensureSkeletonStyles();
 
-        const reviewRequired = document.querySelector('section[aria-label="Reviews"]');
-        if (!reviewRequired) return;
+        const mergeBox = document.querySelector('div[data-testid="mergebox-partial"]');
+        if (!mergeBox) return;
 
-        const existing = document.querySelector('section[aria-label="Code owner approval status"]');
+        const existing = document.querySelector('div[data-codeowner-section="true"]');
         if (existing) existing.remove();
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tmp-ml-md-6 tmp-pl-md-3 tmp-my-3';
+        wrapper.setAttribute('data-codeowner-section', 'true');
+
+        const mergePartialContainer = document.createElement('div');
+        mergePartialContainer.className = 'MergeBox-module__mergePartialContainer__MTXP9 position-relative';
+
+        const borderContainer = document.createElement('div');
+        borderContainer.className = 'border rounded-2 borderColor-default';
 
         const container = document.createElement('section');
         container.setAttribute('aria-label', 'Code owner approval status');
         container.setAttribute('data-codeowner-loading', 'true');
-        container.className = 'border-bottom color-border-subtle';
 
         container.innerHTML = `
 <div class="MergeBoxSectionHeader-module__wrapper___70DU MergeBoxSectionHeader-module__wrapperCanExpand__iicCN">
@@ -248,22 +257,24 @@
 </div>
 `;
 
-        reviewRequired.after(container);
+        borderContainer.appendChild(container);
+        mergePartialContainer.appendChild(borderContainer);
+        wrapper.appendChild(mergePartialContainer);
+
+        mergeBox.before(wrapper);
     }
 
     function insertCodeOwnerSection(result) {
 
         // スケルトンまたは既存のセクションを削除
-        const existingSection = document.querySelector('section[aria-label="Code owner approval status"]');
+        const existingSection = document.querySelector('div[data-codeowner-section="true"]');
         if (existingSection) existingSection.remove();
 
         const approvedList = getApprovedList();
 
-        const reviewRequired = document.querySelector(
-            'section[aria-label="Reviews"]'
-        );
+        const mergeBox = document.querySelector('div[data-testid="mergebox-partial"]');
 
-        if (!reviewRequired) return;
+        if (!mergeBox) return;
 
         const allApproved = result.length > 0 && result.every(row => {
             return row.owners && row.owners.length > 0 && row.owners.some(owner => {
@@ -282,9 +293,18 @@
 
         const sectionId = 'codeowner-expandable-' + Date.now();
 
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tmp-ml-md-6 tmp-pl-md-3 tmp-my-3';
+        wrapper.setAttribute('data-codeowner-section', 'true');
+
+        const mergePartialContainer = document.createElement('div');
+        mergePartialContainer.className = 'MergeBox-module__mergePartialContainer__MTXP9 position-relative';
+
+        const borderContainer = document.createElement('div');
+        borderContainer.className = 'border rounded-2 borderColor-default';
+
         const container = document.createElement("section");
         container.setAttribute("aria-label", "Code owner approval status");
-        container.className = "border-bottom color-border-subtle";
 
         container.innerHTML = `
 <div class="MergeBoxSectionHeader-module__wrapper___70DU MergeBoxSectionHeader-module__wrapperCanExpand__iicCN">
@@ -354,7 +374,11 @@
 </div>
 `;
 
-        reviewRequired.after(container);
+        borderContainer.appendChild(container);
+        mergePartialContainer.appendChild(borderContainer);
+        wrapper.appendChild(mergePartialContainer);
+
+        mergeBox.before(wrapper);
 
         // 折り畳みボタンの動作
         const toggleBtn = container.querySelector('.MergeBoxSectionHeader-module__button__R1r_x');
@@ -483,7 +507,7 @@ class="avatar circle">
         if (!isPRPage()) return;
 
         function tryInit() {
-            if (document.querySelector('section[aria-label="Reviews"]')) {
+            if (document.querySelector('div[data-testid="mergebox-partial"]')) {
                 insertSkeletonSection();
                 main();
                 return true;
@@ -509,7 +533,7 @@ class="avatar circle">
         _generation++;
 
         // 古いセクションを削除
-        const existing = document.querySelector('section[aria-label="Code owner approval status"]');
+        const existing = document.querySelector('div[data-codeowner-section="true"]');
         if (existing) existing.remove();
 
         watchForPRContent();
