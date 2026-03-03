@@ -51,48 +51,51 @@
     }
     async function getTeamMembers(owner, team) {
         try {
-            const div = await getUrl(`https://github.com/orgs/${owner}/teams/${team}`)
+            const baseUrl = `https://github.com/orgs/${owner}/teams/${team}`;
+            let page = 1;
+            const list = [];
 
-            const uls = document.getElementsByClassName(
-                "member-listing table-list table-list-bordered adminable"
-            );
+            while (true) {
+                const res = await fetch(`${baseUrl}?page=${page}`);
+                const html = await res.text();
 
-            var list = [];
+                const doc = new DOMParser().parseFromString(html, 'text/html');
 
-            for (let i = 0; i < uls.length; i++) {
-                const lis = uls[i].getElementsByTagName("li");
+                const uls = doc.getElementsByClassName(
+                    "member-listing table-list table-list-bordered adminable"
+                );
 
-                for (let j = 0; j < lis.length; j++) {
-                    const span = lis[j].querySelector('span[itemprop="name"]');
+                for (let i = 0; i < uls.length; i++) {
+                    const lis = uls[i].getElementsByTagName("li");
 
-                    if (span) {
-                        const name = span.innerText.trim();
-                        if (!list.includes(name)) list.push(name);
-                    } else {
-                        const name = lis[j].innerText.trim();
-                        if (!list.includes(name)) list.push(name);
+                    for (let j = 0; j < lis.length; j++) {
+                        const span = lis[j].querySelector('span[itemprop="name"]');
+
+                        if (span) {
+                            const name = span.textContent.trim();
+                            if (!list.includes(name)) list.push(name);
+                        } else {
+                            const name = lis[j].textContent.trim();
+                            if (!list.includes(name)) list.push(name);
+                        }
                     }
                 }
-            }
 
-            div.remove();
+                const nextBtn = doc.querySelector('a[rel="next"]');
+                if (!nextBtn) break;
+
+                page++;
+            }
 
             return list;
         } catch (e) {
             console.error(e);
         }
     }
-    async function getUrl(url) {
+    async function fetchDoc(url) {
         const res = await fetch(url);
         const html = await res.text();
-
-        const div = document.createElement('div');
-        div.hidden = true;
-        div.innerHTML = html;
-
-        document.body.appendChild(div);
-
-        return div;
+        return new DOMParser().parseFromString(html, 'text/html');
     }
 
     //
@@ -100,13 +103,13 @@
     //
     async function getCodeOwners() {
         try {
-            const div = await getUrl(getCodeOwnersUrl());
+            const doc = await fetchDoc(getCodeOwnersUrl());
 
-            let codeowner = document.querySelector("#copilot-button-positioner > div.CodeBlob-module__codeBlobInner__tfjuQ > div > div.react-code-lines").innerText;
+            const codeowner = doc.querySelector(
+                '#copilot-button-positioner > div.CodeBlob-module__codeBlobInner__tfjuQ > div > div.react-code-lines'
+            )?.textContent;
 
-            div.remove();
-
-            return codeowner;
+            return codeowner || null;
         } catch (e) {
             console.error(e);
         }
@@ -114,21 +117,19 @@
     }
 
     async function getFilesChanged() {
-        const div = await getUrl(`${window.location.href}/changes`);
+        const doc = await fetchDoc(`${window.location.href}/changes`);
 
-        const elements = document.getElementsByClassName("Diff-module__diffHeaderWrapper__UgUyv");
+        const elements = doc.getElementsByClassName('Diff-module__diffHeaderWrapper__UgUyv');
 
         const list = [];
 
         for (let i = 0; i < elements.length; i++) {
-            const code = elements[i].querySelector("h3 code");
+            const code = elements[i].querySelector('h3 code');
             if (code) {
                 list.push(code.textContent.trim());
                 console.log(`diff[${i}]: ${code.textContent.trim()}`);
             }
         }
-
-        div.remove();
 
         return list;
     }
