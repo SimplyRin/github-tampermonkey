@@ -144,6 +144,18 @@
         return result;
     }
 
+    function groupByPattern(result) {
+        const map = new Map();
+        for (const row of result) {
+            const key = row.codeowner || '(no match)';
+            if (!map.has(key)) {
+                map.set(key, { codeowner: row.codeowner, owners: row.owners, files: [] });
+            }
+            map.get(key).files.push(row.file);
+        }
+        return Array.from(map.values());
+    }
+
     function patternToRegex(pattern) {
         let regex = pattern
             .replace(/\./g, '\\.')
@@ -276,7 +288,9 @@
 
         if (!mergeBox) return;
 
-        const allApproved = result.length > 0 && result.every(row => {
+        const grouped = groupByPattern(result);
+
+        const allApproved = grouped.length > 0 && grouped.every(row => {
             return row.owners && row.owners.length > 0 && row.owners.some(owner => {
                 const username = owner.replace('@', '');
                 return approvedList[username] === true;
@@ -335,11 +349,11 @@
         <div class="ReviewerSection-module__reviewerGroupsContainer__it7zd">
             <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
                 <div style="width: 24px; flex-shrink: 0;"></div>
-                <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;">File</div>
+                <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;">Pattern</div>
                 <div class="text-small text-bold fgColor-muted" style="flex: 1;">Code Owners</div>
                 <div class="text-small text-bold fgColor-muted" style="flex: 1;">Approved by</div>
             </div>
-            ${result.map(row => {
+            ${grouped.map(row => {
                 const rowApproved = row.owners && row.owners.some(owner => {
                     const username = owner.replace('@', '');
                     return approvedList[username] === true;
@@ -348,6 +362,8 @@
                     const username = owner.replace('@', '');
                     return approvedList[username] === true;
                 });
+                const fileCount = row.files.length;
+                const fileLabel = fileCount === 1 ? '1 file' : `${fileCount} files`;
                 return `
                 <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
                     <div style="width: 24px; flex-shrink: 0;">
@@ -355,7 +371,7 @@
                     </div>
                     <div style="flex: 2; padding-left: 8px;">
                         <div class="text-bold text-small">${row.codeowner || '(no match)'}</div>
-                        <div class="text-small fgColor-muted">${row.file}</div>
+                        <div class="text-small fgColor-muted">${fileLabel}</div>
                     </div>
                     <div style="flex: 1; display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
                         ${(row.owners || []).map(owner => avatar(owner)).join('')}
