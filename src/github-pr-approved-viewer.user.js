@@ -49,6 +49,35 @@
             'main';
         return `https://github.com/${owner}/${repo}/blob/${branch}/.github/CODEOWNERS`;
     }
+    async function getTeamMembers(owner, team) {
+        try {
+            const div = await getUrl(`https://github.com/orgs/${owner}/teams/${team}`)
+
+            const uls = document.getElementsByClassName(
+                "member-listing table-list table-list-bordered adminable"
+            );
+
+            var list = [];
+
+            for (let i = 0; i < uls.length; i++) {
+                const lis = uls[i].getElementsByTagName("li");
+
+                for (let j = 0; j < lis.length; j++) {
+                    const span = lis[j].querySelector('span[itemprop="name"]');
+
+                    if (span) {
+                        list.push(span.innerText.trim());
+                    }
+                }
+            }
+
+            div.remove();
+
+            return list;
+        } catch (e) {
+            console.error(e);
+        }
+    }
     async function getUrl(url) {
         const res = await fetch(url);
         const html = await res.text();
@@ -156,6 +185,40 @@
         return Array.from(map.values());
     }
 
+    async function resolveTeamOwners(result) {
+        const teamCache = new Map();
+
+        for (const row of result) {
+            for (const owner of row.owners) {
+                const m = owner.match(/^@([^/]+)\/(.+)$/);
+                if (m && !teamCache.has(owner)) {
+                    teamCache.set(owner, []);
+                }
+            }
+        }
+
+        for (const [teamOwner] of teamCache) {
+            const m = teamOwner.match(/^@([^/]+)\/(.+)$/);
+            if (m) {
+                const [, org, team] = m;
+                const members = await getTeamMembers(org, team);
+                teamCache.set(teamOwner, (members || []).map(u => `@${u}`));
+            }
+        }
+
+        return result.map(row => {
+            const expanded = [];
+            for (const owner of row.owners) {
+                if (teamCache.has(owner)) {
+                    expanded.push(...teamCache.get(owner));
+                } else {
+                    expanded.push(owner);
+                }
+            }
+            return { ...row, owners: expanded };
+        });
+    }
+
     function patternToRegex(pattern) {
         let regex = pattern
             .replace(/\./g, '\\.')
@@ -223,7 +286,9 @@
         </div>
         <div class="d-flex flex-1 flex-column flex-sm-row gap-2">
             <div class="flex-1">
-                <h3 class="MergeBoxSectionHeader-module__MergeBoxSectionHeading__Kr_f8 prc-Heading-Heading-MtWFE">Code owner review</h3>
+                <h3 class="MergeBoxSectionHeader-module__MergeBoxSectionHeading__Kr_f8 prc-Heading-Heading-MtWFE">
+                    <span class="codeowner-skel" style="display:inline-block;height:16px;width:160px;vertical-align:middle;"></span>
+                </h3>
                 <span class="codeowner-skel" style="display:inline-block;height:12px;width:220px;margin-top:4px;"></span>
             </div>
         </div>
@@ -500,11 +565,16 @@ class="avatar circle">
 
         console.log(`result: ${JSON.stringify(codeowners, null, 2)}`);
 
+        const resolved = await resolveTeamOwners(codeowners);
+        if (gen !== _generation) return;
+
+        console.log(`resolved: ${JSON.stringify(resolved, null, 2)}`);
+
         const approvedList = getApprovedList();
 
         console.log(`approvedList: ${JSON.stringify(approvedList, null, 2)}`);
 
-        insertCodeOwnerSection(codeowners);
+        insertCodeOwnerSection(resolved);
     }
 
     // ページ遷移・SPA ナビゲーションの管理
