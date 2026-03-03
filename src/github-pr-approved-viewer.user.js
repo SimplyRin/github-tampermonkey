@@ -66,7 +66,11 @@
                     const span = lis[j].querySelector('span[itemprop="name"]');
 
                     if (span) {
-                        list.push(span.innerText.trim());
+                        const name = span.innerText.trim();
+                        if (!list.includes(name)) list.push(name);
+                    } else {
+                        const name = lis[j].innerText.trim();
+                        if (!list.includes(name)) list.push(name);
                     }
                 }
             }
@@ -414,10 +418,33 @@
         <div class="ReviewerSection-module__reviewerGroupsContainer__it7zd">
             <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
                 <div style="width: 24px; flex-shrink: 0;"></div>
-                <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;">Pattern</div>
+                <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;">File</div>
                 <div class="text-small text-bold fgColor-muted" style="flex: 1;">Code Owners</div>
                 <div class="text-small text-bold fgColor-muted" style="flex: 1;">Approved by</div>
             </div>
+            ${(() => {
+                const approvedUsersAll = Object.entries(approvedList).filter(([, v]) => v).map(([u]) => u);
+                return `
+                <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
+                    <div style="width: 24px; flex-shrink: 0;">
+                        ${approvedUsersAll.length > 0 ? iconApproved() : iconPending()}
+                    </div>
+                    <div style="flex: 2; padding-left: 8px;">
+                        <div class="text-bold text-small">Approved users</div>
+                    </div>
+                    <div style="flex: 1; display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                        <span class="text-small fgColor-muted">-</span>
+                    </div>
+                    <div style="flex: 1; display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
+                        ${approvedUsersAll.length > 0
+                            ? approvedUsersAll.map(u => avatar('@' + u)).join('')
+                            : '<span class="text-small fgColor-muted">-</span>'
+                        }
+                    </div>
+                </div>
+                `;
+            })()}
+
             ${grouped.map(row => {
                 const rowApproved = row.owners && row.owners.some(owner => {
                     const username = owner.replace('@', '');
@@ -531,12 +558,12 @@ class="avatar circle">
         const reviewerRows = document.querySelectorAll('form.js-issue-sidebar-form p.d-flex');
 
         reviewerRows.forEach(row => {
-            const nameEl = row.querySelector('span[data-assignee-name]');
+            const nameEl = row.querySelector('span[data-hovercard-type="user"]');
             if (!nameEl) return;
 
             const userName = nameEl.dataset.assigneeName;
 
-            const isApproved = row.querySelector('svg.octicon-check.color-fg-success') !== null;
+            const isApproved = row.querySelector('svg.octicon-check.color-fg-success, svg.octicon-check.color-fg-muted') !== null;
 
             results[userName] = isApproved;
         });
