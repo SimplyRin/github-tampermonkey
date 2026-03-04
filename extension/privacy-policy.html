@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy – GitHub PR Approved Viewer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #24292f;
+      background: #ffffff;
+      padding: 48px 24px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid #d0d7de;
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1f2328;
+    }
+
+    header p {
+      margin-top: 8px;
+      color: #57606a;
+      font-size: 14px;
+    }
+
+    section {
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2328;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eaeef2;
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: #24292f;
+    }
+
+    ul {
+      padding-left: 24px;
+      margin-bottom: 12px;
+    }
+
+    ul li {
+      margin-bottom: 6px;
+      color: #24292f;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #dafbe1;
+      color: #1a7f37;
+      border: 1px solid #82cfb0;
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid #d0d7de;
+      font-size: 13px;
+      color: #57606a;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Privacy Policy</h1>
+      <p>GitHub PR Approved Viewer &nbsp;|&nbsp; Last updated: March 4, 2026</p>
+    </header>
+
+    <section>
+      <h2>概要 / Overview</h2>
+      <span class="badge">✓ データ収集なし</span>
+      <p>
+        <strong>GitHub PR Approved Viewer</strong> は、GitHub の Pull Request ページに CODEOWNERS 承認状況パネルを追加する Chrome 拡張機能です。
+      </p>
+      <p>
+        本拡張機能は、いかなる個人情報・ユーザーデータも収集・保存・送信しません。
+      </p>
+    </section>
+
+    <section>
+      <h2>収集するデータ / Data Collection</h2>
+      <p>本拡張機能は以下のデータを <strong>収集しません</strong>：</p>
+      <ul>
+        <li>個人を特定できる情報（氏名、メールアドレス等）</li>
+        <li>認証情報（パスワード、トークン等）</li>
+        <li>閲覧履歴・行動ログ</li>
+        <li>その他いかなるユーザーデータ</li>
+      </ul>
+      <p>
+        取得した情報（CODEOWNERS の内容、変更ファイル一覧、チームメンバー情報）はすべて <strong>ページ表示のみに使用</strong> され、外部サーバーへの送信・ローカルストレージへの保存は行いません。
+      </p>
+    </section>
+
+    <section>
+      <h2>アクセスする情報 / Data Accessed</h2>
+      <p>本拡張機能は GitHub PR ページを表示する際に以下の情報にアクセスします：</p>
+      <ul>
+        <li>現在表示中の Pull Request のファイル変更一覧（<code>github.com</code> 内のページを fetch）</li>
+        <li>リポジトリの <code>CODEOWNERS</code> ファイルの内容（<code>github.com</code> 内のページを fetch）</li>
+        <li>GitHub チームのメンバー一覧（<code>github.com</code> 内のページを fetch）</li>
+        <li>Pull Request サイドバーのレビュアー承認状態（ページ DOM の読み取り）</li>
+      </ul>
+      <p>
+        すべての通信は <code>https://github.com</code> 内に限定されます。第三者サービスへのデータ送信は一切行いません。
+      </p>
+    </section>
+
+    <section>
+      <h2>第三者への提供 / Third-Party Sharing</h2>
+      <p>
+        いかなる情報も第三者に販売・提供・共有しません。
+      </p>
+    </section>
+
+    <section>
+      <h2>リモートコード / Remote Code</h2>
+      <p>
+        本拡張機能は外部の JavaScript ファイルを読み込みません。<code>eval()</code> や動的コード実行も使用しません。すべてのロジックは拡張機能パッケージに含まれています。
+      </p>
+    </section>
+
+    <section>
+      <h2>変更 / Changes to This Policy</h2>
+      <p>
+        プライバシーポリシーを変更した場合は、このページの「Last updated」日付を更新します。
+      </p>
+    </section>
+
+    <section>
+      <h2>お問い合わせ / Contact</h2>
+      <p>
+        ご質問は GitHub リポジトリの Issue にてお問い合わせください。<br>
+        <a href="https://github.com/SimplyRin/github-tampermonkey" target="_blank" rel="noopener">
+          https://github.com/SimplyRin/github-tampermonkey
+        </a>
+      </p>
+    </section>
+
+    <footer>
+      <p>© 2026 SimplyRin. Released under the MIT License.</p>
+    </footer>
+  </div>
+</body>
+</html>
