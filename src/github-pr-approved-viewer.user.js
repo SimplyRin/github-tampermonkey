@@ -400,7 +400,11 @@
         mergePartialContainer.className = 'MergeBox-module__mergePartialContainer__MTXP9 position-relative';
 
         const borderContainer = document.createElement('div');
-        borderContainer.className = 'border rounded-2 borderColor-default';
+        borderContainer.className = 'rounded-2';
+        borderContainer.style.border = allApproved
+            ? '1px solid var(--borderColor-success, #1a7f37)'
+            : '1px solid var(--borderColor-attention, #9a6700)';
+        borderContainer.style.overflow = 'hidden';
 
         const container = document.createElement("section");
         container.setAttribute("aria-label", "Code owner approval status");
