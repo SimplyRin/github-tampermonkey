@@ -216,9 +216,11 @@
             const expanded = [];
             for (const owner of row.owners) {
                 if (teamCache.has(owner)) {
-                    expanded.push(...teamCache.get(owner));
+                    for (const member of teamCache.get(owner)) {
+                        if (!expanded.includes(member)) expanded.push(member);
+                    }
                 } else {
-                    expanded.push(owner);
+                    if (!expanded.includes(owner)) expanded.push(owner);
                 }
             }
             return { ...row, owners: expanded };
