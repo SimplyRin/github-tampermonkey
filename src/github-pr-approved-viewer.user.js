@@ -461,7 +461,7 @@
                 `;
             })()}
 
-            ${grouped.map(row => {
+            ${grouped.map((row, rowIdx) => {
                 const rowApproved = row.owners && row.owners.some(owner => {
                     const username = owner.replace('@', '');
                     return approvedList[username] === true;
@@ -482,7 +482,7 @@
                         <div class="text-small fgColor-muted">${fileLabel}</div>
                     </div>
                     <div style="flex: 1; display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
-                        ${(row.owners || []).map(owner => avatar(owner)).join('')}
+                        ${ownersToggleHtml(row.owners, sectionId + '-row-' + rowIdx)}
                     </div>
                     <div style="flex: 1; display: flex; gap: 4px; flex-wrap: wrap; align-items: center;">
                         ${approvedOwners.length > 0
@@ -528,6 +528,23 @@
             }
         });
 
+        wrapper.querySelectorAll('.codeowner-more-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const hiddenId = btn.dataset.hiddenId;
+                const moreCount = btn.dataset.moreCount;
+                const hiddenEl = document.getElementById(hiddenId);
+                if (!hiddenEl) return;
+                const isHidden = hiddenEl.style.display === 'none';
+                if (isHidden) {
+                    hiddenEl.style.display = 'contents';
+                    btn.textContent = 'less';
+                } else {
+                    hiddenEl.style.display = 'none';
+                    btn.textContent = moreCount + ' more';
+                }
+            });
+        });
+
     }
 
     function iconApproved() {
@@ -571,6 +588,21 @@ class="avatar circle">
 </a>
 `;
 
+    }
+
+    function ownersToggleHtml(owners, idPrefix, threshold = 14) {
+        if (!owners || owners.length === 0) {
+            return '<span class="text-small fgColor-muted">-</span>';
+        }
+        if (owners.length <= threshold) {
+            return owners.map(o => avatar(o)).join('');
+        }
+        const visible = owners.slice(0, threshold);
+        const hidden = owners.slice(threshold);
+        const moreCount = hidden.length;
+        const hiddenId = idPrefix + '-hidden';
+        const btnId = idPrefix + '-btn';
+        return `${visible.map(o => avatar(o)).join('')}<span id="${hiddenId}" style="display:none;">${hidden.map(o => avatar(o)).join('')}</span><button id="${btnId}" type="button" class="codeowner-more-btn text-small" style="background:none;border:none;cursor:pointer;padding:0 2px;color:var(--fgColor-accent,#0969da);white-space:nowrap;" data-hidden-id="${hiddenId}" data-more-count="${moreCount}">${moreCount} more</button>`;
     }
 
     function getApprovedList() {
