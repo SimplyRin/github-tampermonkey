@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub PR Approved Viewer
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  try to take over the world!
 // @author       @SimplyRin
 // @match        https://github.com/*
