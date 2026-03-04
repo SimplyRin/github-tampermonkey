@@ -289,7 +289,7 @@
 
         const iconWrapper = document.createElement('div');
         iconWrapper.className = 'd-none d-lg-block';
-        iconWrapper.innerHTML = `<div class="d-flex flex-justify-center flex-items-center mr-2 rounded-2 height-2 width-2 position-absolute MergeabilityIcon-module__mergeabilityIcon__pgZrk" style="background-color: var(--bgColor-neutral-emphasis);"><svg aria-hidden="true" focusable="false" class="octicon octicon-shield-lock fgColor-onEmphasis" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom;"><path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path></svg></div>`;
+        iconWrapper.innerHTML = `<div class="d-flex flex-justify-center flex-items-center mr-2 rounded-2 height-2 width-2 position-absolute MergeabilityIcon-module__mergeabilityIcon__pgZrk" style="background-color: var(--bgColor-neutral-emphasis);"><svg aria-hidden="true" focusable="false" class="octicon octicon-shield-lock fgColor-onEmphasis" viewBox="0 0 16 16" width="24" height="24" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom;"><path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path></svg></div>`;
 
         const container = document.createElement('section');
         container.setAttribute('aria-label', 'Code owner approval status');
@@ -316,9 +316,9 @@
 <div>
     <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
         <div style="width: 24px; flex-shrink: 0;"></div>
-        <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;">File</div>
-        <div class="text-small text-bold fgColor-muted" style="flex: 1;">Code Owners</div>
-        <div class="text-small text-bold fgColor-muted" style="flex: 1;">Approved by</div>
+        <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;"><span class="codeowner-skel" style="height:10px;width:28px;"></span></div>
+        <div class="text-small text-bold fgColor-muted" style="flex: 1;"><span class="codeowner-skel" style="height:10px;width:72px;"></span></div>
+        <div class="text-small text-bold fgColor-muted" style="flex: 1;"><span class="codeowner-skel" style="height:10px;width:68px;"></span></div>
     </div>
     <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
         <div style="width: 24px; flex-shrink: 0;">
@@ -436,7 +436,7 @@
 <div id="${sectionId}" class="MergeBoxExpandable-module__expandableWrapper__IcZEm MergeBoxExpandable-module__isExpanded__WZlhA" style="visibility: visible;">
     <div class="MergeBoxExpandable-module__expandableContent__xCBlh MergeBoxExpandable-module__isExpanded__WZlhA">
         <div class="ReviewerSection-module__reviewerGroupsContainer__it7zd">
-            <div class="d-flex flex-items-center p-2 border-top borderColor-muted" style="gap: 0;">
+            <div class="d-flex flex-items-center p-2 borderColor-muted" style="gap: 0;">
                 <div style="width: 24px; flex-shrink: 0;"></div>
                 <div class="text-small text-bold fgColor-muted" style="flex: 2; padding-left: 8px;">File</div>
                 <div class="text-small text-bold fgColor-muted" style="flex: 1;">Code Owners</div>
@@ -504,7 +504,7 @@
 
         const iconWrapper = document.createElement('div');
         iconWrapper.className = 'd-none d-lg-block';
-        iconWrapper.innerHTML = `<div class="d-flex flex-justify-center flex-items-center mr-2 rounded-2 height-2 width-2 position-absolute MergeabilityIcon-module__mergeabilityIcon__pgZrk" style="background-color: ${headerIconBg};"><svg aria-hidden="true" focusable="false" class="octicon octicon-shield-lock fgColor-onEmphasis" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom;"><path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path></svg></div>`;
+        iconWrapper.innerHTML = `<div class="d-flex flex-justify-center flex-items-center mr-2 rounded-2 height-2 width-2 position-absolute MergeabilityIcon-module__mergeabilityIcon__pgZrk" style="background-color: ${headerIconBg};"><svg aria-hidden="true" focusable="false" class="octicon octicon-shield-lock fgColor-onEmphasis" viewBox="0 0 16 16" width="24" height="24" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom;"><path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path></svg></div>`;
 
         borderContainer.appendChild(container);
         mergePartialContainer.appendChild(iconWrapper);
