@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub PR Approved Viewer
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.7.1
 // @description  Adds a 'Code owner review' panel to GitHub Pull Request pages. Displays CODEOWNERS approval status per file path with real-time updates when reviewer approvals change.
 // @author       @SimplyRin
 // @match        https://github.com/*
@@ -235,13 +235,23 @@
     }
 
     function patternToRegex(pattern) {
-        let regex = pattern
-            .replace(/\./g, '\\.')
-            .replace(/\*\*/g, '.*')
-            .replace(/\*/g, '[^/]*');
+        const normalized = pattern.replace(/^\/+/, '/');
 
-        if (pattern.endsWith('/')) {
-            regex = '^' + regex + '.*';
+        let regex = normalized
+            .replace(/\*\*/g, '\x00GLOBSTAR\x00')
+            .replace(/\./g, '\\.')
+            .replace(/\*/g, '[^/]*')
+            .replace(/\x00GLOBSTAR\x00/g, '.*');
+
+        if (normalized === '/*' || normalized === '/') {
+            // ルートワイルドカード: 全ファイルにマッチ
+            regex = '^/.*$';
+        } else if (normalized.endsWith('/')) {
+            // ディレクトリパターン: 配下の全ファイルにマッチ
+            regex = '^' + regex + '.*$';
+        } else if (!normalized.includes('/')) {
+            // スラッシュなし: どのディレクトリのファイルにもマッチ
+            regex = '^.*/' + regex.replace(/^\//, '') + '$';
         } else {
             regex = '^' + regex + '$';
         }
