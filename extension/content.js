@@ -696,7 +696,7 @@ class="avatar circle">
                     _reviewObserver = null;
                 }
             });
-            _reviewObserver.observe(document.body, { childList: true, subtree: true });
+            _reviewObserver.observe(document.documentElement, { childList: true, subtree: true });
         }
     }
 
@@ -726,6 +726,10 @@ class="avatar circle">
 
     // ページ遷移を検出（SPA対応）
     window.addEventListener('popstate', scheduleNavCheck);
+
+    // GitHub が使用する Turbo / Turbolinks のナビゲーション完了イベントを検出
+    document.addEventListener('turbo:load', scheduleNavCheck);
+    document.addEventListener('turbolinks:load', scheduleNavCheck);
 
     // History API による遷移も検出
     const originalPushState = window.history.pushState;
