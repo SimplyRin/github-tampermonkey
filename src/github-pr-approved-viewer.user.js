@@ -103,7 +103,12 @@
     //
     async function getCodeOwners() {
         try {
-            const doc = await fetchDoc(getCodeOwnersUrl());
+            const res = await fetch(getCodeOwnersUrl());
+            if (res.status === 404) {
+                return false;
+            }
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
 
             const codeowner = doc.querySelector(
                 '#copilot-button-positioner > div.CodeBlob-module__codeBlobInner__tfjuQ > div > div.react-code-lines'
@@ -265,6 +270,59 @@
         }
 
         return new RegExp(regex);
+    }
+
+    function insertNoCodeOwnersSection() {
+        const existingSection = document.querySelector('div[data-codeowner-section="true"]');
+        if (existingSection) existingSection.remove();
+
+        const mergeBox = document.querySelector('div[data-testid="mergebox-partial"]');
+        if (!mergeBox) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tmp-ml-md-6 tmp-pl-md-3 tmp-my-3';
+        wrapper.setAttribute('data-codeowner-section', 'true');
+
+        const mergePartialContainer = document.createElement('div');
+        mergePartialContainer.className = 'MergeBox-module__mergePartialContainer__MTXP9 position-relative';
+
+        const borderContainer = document.createElement('div');
+        borderContainer.className = 'rounded-2';
+        borderContainer.style.border = '1px solid var(--borderColor-default)';
+        borderContainer.style.overflow = 'hidden';
+
+        const iconWrapper = document.createElement('div');
+        iconWrapper.className = 'd-none d-lg-block';
+        iconWrapper.innerHTML = `<div class="d-flex flex-justify-center flex-items-center mr-2 rounded-2 height-2 width-2 position-absolute MergeabilityIcon-module__mergeabilityIcon__pgZrk" style="background-color: var(--bgColor-neutral-emphasis);"><svg aria-hidden="true" focusable="false" class="octicon octicon-shield-lock fgColor-onEmphasis" viewBox="0 0 16 16" width="24" height="24" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom;"><path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path></svg></div>`;
+
+        const container = document.createElement('section');
+        container.setAttribute('aria-label', 'Code owner approval status');
+        container.innerHTML = `
+<div class="MergeBoxSectionHeader-module__wrapper___70DU">
+    <div class="d-flex width-full">
+        <div class="mr-2 flex-shrink-0">
+            <div style="overflow: hidden; border-width: 0px; border-radius: 50%; border-style: solid; border-color: var(--borderColor-default); width: 32px; height: 32px;">
+                <div style="display: flex; width: 32px; height: 32px; align-items: center; justify-content: center; background-color: var(--bgColor-neutral-emphasis);">
+                    <svg aria-hidden="true" focusable="false" class="octicon octicon-alert-fill" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom; color: var(--fgColor-onEmphasis);"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575ZM8 5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8 5Zm1 6a1 1 0 1 0-2 0 1 1 0 0 0 2 0Z"></path></svg>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-1 flex-column flex-sm-row gap-2">
+            <div class="flex-1">
+                <h3 class="MergeBoxSectionHeader-module__MergeBoxSectionHeading__Kr_f8 prc-Heading-Heading-MtWFE">Code owner review</h3>
+                <p class="fgColor-muted mb-0">No .github/CODEOWNERS file found in this repository.</p>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+        borderContainer.appendChild(container);
+        mergePartialContainer.appendChild(iconWrapper);
+        mergePartialContainer.appendChild(borderContainer);
+        wrapper.appendChild(mergePartialContainer);
+
+        mergeBox.before(wrapper);
     }
 
     function ensureSkeletonStyles() {
@@ -654,6 +712,15 @@ class="avatar circle">
 
         const codeowner = await getCodeOwners();
         if (gen !== _generation) return;
+
+        if (codeowner === false) {
+            insertNoCodeOwnersSection();
+            return;
+        }
+
+        if (!codeowner) {
+            return;
+        }
 
         console.log(`location: ${window.location.href}`);
         const changed = await getFilesChanged();
