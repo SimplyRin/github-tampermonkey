@@ -159,20 +159,23 @@
 
             let matchedOwners = [];
             let matchedPattern = null;
+            let matchedIndex = -1;
 
-            for (const rule of rules) {
-                const regex = patternToRegex(ensureLeadingSlash(rule.pattern));
+            for (let i = 0; i < rules.length; i++) {
+                const regex = patternToRegex(ensureLeadingSlash(rules[i].pattern));
 
                 if (regex.test(file)) {
-                    matchedOwners = rule.owners;
-                    matchedPattern = rule.pattern;
+                    matchedOwners = rules[i].owners;
+                    matchedPattern = rules[i].pattern;
+                    matchedIndex = i;
                 }
             }
 
             result.push({
                 file: file,
                 codeowner: matchedPattern,
-                owners: matchedOwners
+                owners: matchedOwners,
+                ruleIndex: matchedIndex
             });
         }
 
@@ -184,11 +187,16 @@
         for (const row of result) {
             const key = row.codeowner || '(no match)';
             if (!map.has(key)) {
-                map.set(key, { codeowner: row.codeowner, owners: row.owners, files: [] });
+                map.set(key, { codeowner: row.codeowner, owners: row.owners, files: [], ruleIndex: row.ruleIndex });
             }
             map.get(key).files.push(row.file);
         }
-        return Array.from(map.values());
+        return Array.from(map.values()).sort((a, b) => {
+            if (a.ruleIndex === -1 && b.ruleIndex === -1) return 0;
+            if (a.ruleIndex === -1) return 1;
+            if (b.ruleIndex === -1) return -1;
+            return a.ruleIndex - b.ruleIndex;
+        });
     }
 
     async function resolveTeamOwners(result) {
