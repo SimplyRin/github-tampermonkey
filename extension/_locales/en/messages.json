@@ -1,0 +1,8 @@
+{
+  "appName": {
+    "message": "GitHub PR Approved Viewer"
+  },
+  "appDescription": {
+    "message": "Adds a 'Code owner review' panel to GitHub Pull Request pages."
+  }
+}

@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "GitHub PR Approved Viewer",
+  "name": "__MSG_appName__",
   "version": "1.7.1",
-  "description": "Adds a 'Code owner review' panel to GitHub Pull Request pages. Displays CODEOWNERS approval status per file path with real-time updates.",
+  "description": "__MSG_appDescription__",
+  "default_locale": "en",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

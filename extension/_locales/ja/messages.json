@@ -1,0 +1,8 @@
+{
+  "appName": {
+    "message": "GitHub PR Approved Viewer"
+  },
+  "appDescription": {
+    "message": "GitHub の Pull Request ページにコードオーナーのレビュー承認状況を表示します。" 
+  }
+}
