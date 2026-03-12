@@ -15,8 +15,12 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "GitHub PR Approved Viewer"
+    "default_title": "GitHub PR Approved Viewer",
+    "default_popup": "popup.html"
   },
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],

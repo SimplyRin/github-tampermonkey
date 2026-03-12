@@ -174,7 +174,7 @@
         return result;
     }
 
-    function groupByPattern(result) {
+    function groupByPattern(result, sortMode, wildcardFirst) {
         const map = new Map();
         for (const row of result) {
             const key = row.codeowner || '(no match)';
@@ -183,12 +183,38 @@
             }
             map.get(key).files.push(row.file);
         }
-        return Array.from(map.values()).sort((a, b) => {
-            if (a.ruleIndex === -1 && b.ruleIndex === -1) return 0;
-            if (a.ruleIndex === -1) return 1;
-            if (b.ruleIndex === -1) return -1;
-            return a.ruleIndex - b.ruleIndex;
-        });
+
+        let groups = Array.from(map.values());
+
+        if (sortMode === 'codeowners') {
+            // CODEOWNERS ファイルのルール定義順
+            groups = groups.sort((a, b) => {
+                if (a.ruleIndex === -1 && b.ruleIndex === -1) return 0;
+                if (a.ruleIndex === -1) return 1;
+                if (b.ruleIndex === -1) return -1;
+                return a.ruleIndex - b.ruleIndex;
+            });
+        } else if (sortMode === 'atoz') {
+            // アルファベット順（マッチなしは末尾）
+            groups = groups.sort((a, b) => {
+                if (a.codeowner === null && b.codeowner === null) return 0;
+                if (a.codeowner === null) return 1;
+                if (b.codeowner === null) return -1;
+                return a.codeowner.localeCompare(b.codeowner);
+            });
+        }
+        // 'default' は Map の挿入順（差分ファイルの処理順）をそのまま維持
+
+        // * を常に先頭に固定するオプション
+        if (wildcardFirst) {
+            const wildcardIdx = groups.findIndex(g => g.codeowner === '*');
+            if (wildcardIdx > 0) {
+                const [wildcard] = groups.splice(wildcardIdx, 1);
+                groups.unshift(wildcard);
+            }
+        }
+
+        return groups;
     }
 
     async function resolveTeamOwners(result) {
@@ -424,7 +450,7 @@
         mergeBox.before(wrapper);
     }
 
-    function insertCodeOwnerSection(result) {
+    async function insertCodeOwnerSection(result) {
 
         // スケルトンまたは既存のセクションを削除
         const existingSection = document.querySelector('div[data-codeowner-section="true"]');
@@ -436,7 +462,12 @@
 
         if (!mergeBox) return;
 
-        const grouped = groupByPattern(result);
+        // 設定を読み込む
+        const settings = await new Promise(resolve => {
+            chrome.storage.sync.get({ sortOrder: 'default', wildcardFirst: true }, resolve);
+        });
+
+        const grouped = groupByPattern(result, settings.sortOrder, settings.wildcardFirst);
 
         const allApproved = grouped.length > 0 && grouped.every(row => {
             return row.owners && row.owners.length > 0 && row.owners.some(owner => {
@@ -729,6 +760,7 @@ class="avatar circle">
 
         console.log(`approvedList: ${JSON.stringify(approvedList, null, 2)}`);
 
+        _lastResolved = resolved;
         insertCodeOwnerSection(resolved);
     }
 
@@ -737,6 +769,15 @@ class="avatar circle">
     let _generation = 0;
     let _navTimer = null;
     let _reviewObserver = null;
+    let _lastResolved = null;
+
+    // 設定変更時にその場で再描画する
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'sync') return;
+        if (!isPRPage()) return;
+        if (!_lastResolved) return;
+        insertCodeOwnerSection(_lastResolved);
+    });
 
     // Reviews セクションの出現を監視し、スケルトンを即時挿入してデータ取得を開始する
     function watchForPRContent() {
@@ -772,6 +813,7 @@ class="avatar circle">
         if (url === _lastUrl) return;
         _lastUrl = url;
         _generation++;
+        _lastResolved = null;
 
         // 古いセクションを削除
         const existing = document.querySelector('div[data-codeowner-section="true"]');

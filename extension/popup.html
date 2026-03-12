@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+      background: #f2f2f7;
+      color: #1c1c1e;
+      width: 320px;
+      padding-bottom: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ────────────────────────────── */
+    .header {
+      padding: 22px 16px 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      background: linear-gradient(145deg, #1971f5 0%, #5e17eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(89, 23, 235, 0.35);
+    }
+
+    .header-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1c1c1e;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: #8e8e93;
+      margin-top: 2px;
+      letter-spacing: -0.1px;
+    }
+
+    /* ── Section ───────────────────────────── */
+    .section {
+      margin: 18px 0 0;
+      padding: 0 16px;
+    }
+
+    .section-header {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6d6d72;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 0 6px 7px;
+    }
+
+    .section-body {
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+    }
+
+    /* ── Row ────────────────────────────────── */
+    .row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px 10px 12px;
+      min-height: 50px;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s ease;
+    }
+
+    .row:active {
+      background: #f2f2f7;
+    }
+
+    .row + .row::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 54px;
+      right: 0;
+      height: 0.5px;
+      background: rgba(60, 60, 67, 0.18);
+    }
+
+    .row-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .row-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .row-label {
+      font-size: 16px;
+      font-weight: 400;
+      color: #1c1c1e;
+      line-height: 1.25;
+    }
+
+    .row-desc {
+      font-size: 12px;
+      color: #8e8e93;
+      margin-top: 2px;
+      letter-spacing: -0.1px;
+      line-height: 1.3;
+    }
+
+    /* ── Checkmark (radio indicator) ─────── */
+    .row-check {
+      color: #007aff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .row-check .check-icon {
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .row-check.selected .check-icon {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ── Toggle switch ──────────────────────── */
+    .toggle {
+      position: relative;
+      width: 51px;
+      height: 31px;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #e5e5ea;
+      border-radius: 31px;
+      transition: background 0.22s ease;
+      cursor: pointer;
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow:
+        0 2px 5px rgba(0, 0, 0, 0.25),
+        0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle input:checked + .toggle-track {
+      background: #34c759;
+    }
+
+    .toggle input:checked + .toggle-track::after {
+      transform: translateX(20px);
+    }
+
+    /* ── Divider ────────────────────────────── */
+    .divider {
+      height: 0.5px;
+      background: rgba(60, 60, 67, 0.18);
+      margin: 0 16px 0 54px;
+    }
+
+    /* ── Footer note ────────────────────────── */
+    .section-footer {
+      font-size: 12px;
+      color: #8e8e93;
+      padding: 7px 6px 0;
+      line-height: 1.5;
+    }
+
+    /* ── Toast ──────────────────────────────── */
+    .saved-toast {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(44, 44, 46, 0.92);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.25s ease;
+      opacity: 0;
+      white-space: nowrap;
+    }
+
+    .saved-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ──────────────────────────── -->
+  <div class="header">
+    <div class="header-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="26" height="26" fill="white">
+        <path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <div class="header-title">Code Owner Review</div>
+      <div class="header-subtitle">GitHub PR Approved Viewer</div>
+    </div>
+  </div>
+
+  <!-- ── Sort Order ──────────────────────── -->
+  <div class="section">
+    <div class="section-header">表示順</div>
+    <div class="section-body">
+
+      <!-- Default -->
+      <div class="row sort-row" data-value="default">
+        <div class="row-icon" style="background: #5856d6;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="white">
+            <path d="M2 2.75C2 1.784 2.784 1 3.75 1h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 12.25 16h-8.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v11.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 8 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <div class="row-label">Default</div>
+          <div class="row-desc">差分の処理順で表示</div>
+        </div>
+        <div class="row-check selected">
+          <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0L2.22 7.28a.75.75 0 1 1 1.06-1.06L7 9.94l5.72-5.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Sort by CODEOWNERS file -->
+      <div class="row sort-row" data-value="codeowners">
+        <div class="row-icon" style="background: #ff9500;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="white">
+            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L6.5 5.44l1.72-1.72a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L7.56 6.5l1.72 1.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L6.5 7.56l-1.72 1.72a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L5.44 6.5 3.72 4.78a.75.75 0 0 1 0-1.06Zm4.5 6a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 1 1-1.06 1.06l-3.25-3.25a.75.75 0 0 1 0-1.06Zm1.78-1.78a.75.75 0 0 1 0 1.06l-1.5 1.5a.75.75 0 0 1-1.06-1.06l1.5-1.5a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <div class="row-label">Sort by CODEOWNERS file</div>
+          <div class="row-desc">CODEOWNERS のルール順で表示</div>
+        </div>
+        <div class="row-check">
+          <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0L2.22 7.28a.75.75 0 1 1 1.06-1.06L7 9.94l5.72-5.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- A to Z -->
+      <div class="row sort-row" data-value="atoz">
+        <div class="row-icon" style="background: #34c759;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="white">
+            <path d="M.75 3.25a.75.75 0 0 1 .75.75v8a.75.75 0 0 1-1.5 0V4A.75.75 0 0 1 .75 3.25Zm4.5 3a.75.75 0 0 1 .75.75v5a.75.75 0 0 1-1.5 0V7A.75.75 0 0 1 5.25 6.25Zm4.5-3.5a.75.75 0 0 1 .75.75V12a.75.75 0 0 1-1.5 0V3.5a.75.75 0 0 1 .75-.75Zm4.5 6a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-1.5 0V9.5a.75.75 0 0 1 .75-.75Z"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <div class="row-label">A to Z</div>
+          <div class="row-desc">パターン名をアルファベット順で表示</div>
+        </div>
+        <div class="row-check">
+          <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0L2.22 7.28a.75.75 0 1 1 1.06-1.06L7 9.94l5.72-5.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Options ──────────────────────────── -->
+  <div class="section">
+    <div class="section-header">オプション</div>
+    <div class="section-body">
+      <div class="row" style="cursor: default;">
+        <div class="row-icon" style="background: #007aff;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="white">
+            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <div class="row-label">* を常に先頭に表示</div>
+          <div class="row-desc">全ファイル対象のルールを最上部に固定</div>
+        </div>
+        <label class="toggle" for="wildcardFirst" style="cursor: pointer;">
+          <input type="checkbox" id="wildcardFirst">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+    <div class="section-footer">有効にすると、選択中の表示順に関わらず <code style="font-size: 11px; background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 4px;">*</code> のルールを常に一番上に表示します。</div>
+  </div>
+
+  <div class="saved-toast" id="savedToast">設定を保存しました</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

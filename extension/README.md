@@ -38,6 +38,20 @@ convert -background none icons/icon.svg -resize 128x128 icons/icon128.png
 3. 「パッケージ化されていない拡張機能を読み込む」をクリック
 4. この `extension/` フォルダを選択
 
+## テスト手順
+
+拡張機能をインストールしたら、以下のテスト用リポジトリの Pull Request ページを開くとサンプルのコードオーナー表示を確認できます。
+
+**テスト用リポジトリ：**  
+👉 [https://github.com/PegSaba/test-codeowners](https://github.com/PegSaba/test-codeowners)
+
+1. 上記リンクから Pull Requests タブを開く
+2. いずれかの PR を開く
+3. マージボックス（チェック一覧）の「Reviews」セクションの直下に **「Code owner review」** パネルが表示されることを確認する
+4. ファイルパスごとの Code Owners と承認者がアバター付きで一覧表示されれば動作確認 OK
+
+> **Note:** GitHub へのログインが必要です。また、チームメンバーの表示には Organization の Teams ページへのアクセス権限が必要です。
+
 ## Chrome Web Store への公開手順
 
 1. PNG アイコンを用意する（上記参照）
